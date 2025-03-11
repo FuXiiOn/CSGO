@@ -329,7 +329,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		float closestDistance = FLT_MAX;
 		Vector3* viewAngles = (Vector3*)(*(uintptr_t*)(engineBase + 0x59F19C) + 0x4D90);
 		Vector3 rcsAngles;
-		float fovDegrees = 1.3f * atan(Config::fovRadius / (wndWidth / 2.0f)) * (180.0f / PI);
+		float fovDegrees = 1.4f * atan(Config::fovRadius / (wndWidth / 2.0f)) * (180.0f / PI);
 
 		for (int i = 1; i < *currPlayers; i++) {
 			ent* entity = *(ent**)(entList + i * 0x10);
@@ -465,7 +465,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Visuals")) {
-			ImGui::Checkbox("ESP", &Config::bEsp);
+			ImGui::Checkbox("Draw Box", &Config::bEsp);
 			ImGui::Checkbox("HealthBar", &Config::bHealthbar);
 			ImGui::Checkbox("Draw Skeleton", &Config::bSkeleton);
 			ImGui::Checkbox("Draw Names", &Config::bNames);
