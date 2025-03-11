@@ -1,0 +1,8 @@
+Release
+csgo
+Debug
+.vs
+csgo.sln
+csgo.vcxproj
+csgo.vcxproj.filters
+csgo.vcxproj.user
