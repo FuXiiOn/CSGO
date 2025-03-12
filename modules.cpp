@@ -501,6 +501,144 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Settings")) {
+			static char fileName[MAX_PATH] = "";
+			static std::string selectedConfig = "";
+			static char localAppdata[MAX_PATH] = "";
+			static bool isConfigSelected = false;
+
+			ExpandEnvironmentStringsA("%localappdata%", localAppdata, MAX_PATH);
+
+			std::string configPath = std::string(localAppdata) + "\\" + fileName + ".ini";
+			std::string searchPattern = std::string(localAppdata) + "\\*.ini";
+
+			WIN32_FIND_DATAA findData;
+			HANDLE hFind = FindFirstFileA(searchPattern.c_str(), &findData);
+			std::vector<std::string> configFiles;
+
+			if (hFind != INVALID_HANDLE_VALUE) {
+				do {
+					configFiles.push_back(findData.cFileName);
+				} while (FindNextFileA(hFind, &findData) != 0);
+				FindClose(hFind);
+			}
+
+			ImGui::Text("Configs");
+
+			if (ImGui::BeginListBox("##configs", ImVec2(300, 5 * ImGui::GetTextLineHeightWithSpacing()))) {
+				for (const std::string& file : configFiles) {
+					if (ImGui::Selectable(file.substr(0, file.find(".ini")).c_str(), selectedConfig == file)) {
+						selectedConfig = file;
+						isConfigSelected = true;
+					}
+				}
+				ImGui::EndListBox();
+			}
+
+			if (isConfigSelected) {
+				std::string selectedConfigPath = std::string(localAppdata) + "\\" + selectedConfig;
+
+				if (ImGui::Button("Save Config", ImVec2(120, 20))) {
+					WritePrivateProfileStringA("Aimbot", "Aimbot", Config::bAimbot ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "Smoothing", std::to_string(Config::smoothness).c_str(), selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "BoneNum", std::to_string(Config::boneNum).c_str(), selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "SilentAim", Config::bSilentAim ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "SnapLines", Config::bSnaplines ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "FOV", Config::bFov ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "FOVRadius", std::to_string(Config::fovRadius).c_str(), selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "VisibleCheck", Config::bVisCheck ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "TriggerBot", Config::bTriggerbot ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("ESP", "ESP", Config::bEsp ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("ESP", "DrawHealthBar", Config::bHealthbar ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("ESP", "DrawNames", Config::bNames ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("ESP", "DrawDistance", Config::bDistance ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("ESP", "RadarHack", Config::bRadar ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Misc", "RCS", Config::bRcs ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Misc", "NoFlash", Config::bAntiFlash ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Misc", "BunnyHop", Config::bBunnyHop ? "1" : "0", selectedConfigPath.c_str());
+				}
+
+				if (ImGui::Button("Load Config", ImVec2(120, 20))) {
+					char smoothValue[MAX_PATH];
+					char fovValue[MAX_PATH];
+					GetPrivateProfileStringA("Aimbot", "Smoothing", "0", smoothValue, MAX_PATH, selectedConfigPath.c_str());
+					GetPrivateProfileStringA("Aimbot", "FOVRadius", "0", fovValue, MAX_PATH, selectedConfigPath.c_str());
+
+					Config::bAimbot = GetPrivateProfileIntA("Aimbot", "Aimbot", 0, selectedConfigPath.c_str());
+					Config::smoothness = std::stof(smoothValue);
+					Config::boneNum = GetPrivateProfileIntA("Aimbot", "BoneNum", 8, selectedConfigPath.c_str());
+					Config::bSilentAim = GetPrivateProfileIntA("Aimbot", "SilentAim", 0, selectedConfigPath.c_str());
+					Config::bSnaplines = GetPrivateProfileIntA("Aimbot", "SnapLines", 0, selectedConfigPath.c_str());
+					Config::bFov = GetPrivateProfileIntA("Aimbot", "FOV", 0, selectedConfigPath.c_str());
+					Config::fovRadius = std::stof(fovValue);
+					Config::bVisCheck = GetPrivateProfileIntA("Aimbot", "VisibleCheck", 0, selectedConfigPath.c_str());
+					Config::bTriggerbot = GetPrivateProfileIntA("Aimbot", "TriggerBot", 0, selectedConfigPath.c_str());
+					Config::bEsp = GetPrivateProfileIntA("ESP", "ESP", 0, selectedConfigPath.c_str());
+					Config::bHealthbar = GetPrivateProfileIntA("ESP", "DrawHealthBar", 0, selectedConfigPath.c_str());
+					Config::bNames = GetPrivateProfileIntA("ESP", "DrawNames", 0, selectedConfigPath.c_str());
+					Config::bDistance = GetPrivateProfileIntA("ESP", "DrawDistance", 0, selectedConfigPath.c_str());
+					Config::bRadar = GetPrivateProfileIntA("ESP", "RadarHack", 0, selectedConfigPath.c_str());
+					Config::bRcs = GetPrivateProfileIntA("Misc", "RCS", 0, selectedConfigPath.c_str());
+					Config::bAntiFlash = GetPrivateProfileIntA("Misc", "NoFlash", 0, selectedConfigPath.c_str());
+					Config::bBunnyHop = GetPrivateProfileIntA("Misc", "BunnyHop", 0, selectedConfigPath.c_str());
+				}
+
+				if (ImGui::Button("Delete Config", ImVec2(120, 20))) {
+					if (DeleteFileA(selectedConfigPath.c_str())) {
+						selectedConfig = "";
+						isConfigSelected = false;
+					}
+				}
+
+				if (ImGui::Button("Rename Config", ImVec2(120, 20))) {
+					ImGui::OpenPopup("Rename Config");
+					ImGui::SetNextWindowSize(ImVec2(150, 80));
+				}
+
+				if (ImGui::BeginPopupModal("Rename Config", 0, ImGuiWindowFlags_NoResize)) {
+					static char newName[256];
+					std::string newNamePath = std::string(localAppdata) + "\\" + newName + ".ini";
+					ImGui::InputText("##cfgRename", newName, 256);
+
+					if (ImGui::Button("Rename")) {
+						if (newName[0] != '\0') {
+							MoveFileA(selectedConfigPath.c_str(), newNamePath.c_str());
+							ImGui::CloseCurrentPopup();
+							memset(newName, 0, sizeof(newName));
+						}
+					}
+					ImGui::EndPopup();
+				}
+			}
+
+			ImGui::InputText("Config name", fileName, MAX_PATH);
+
+			if (ImGui::Button("Create Config", ImVec2(120, 20)) && fileName[0] != '\0') {
+
+				if (GetFileAttributesA(configPath.c_str()) == INVALID_FILE_ATTRIBUTES) {
+					HANDLE hFile = CreateFileA(configPath.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+					if (hFile != INVALID_HANDLE_VALUE) {
+						WritePrivateProfileStringA("Aimbot", "Aimbot", Config::bAimbot ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "Smoothing", std::to_string(Config::smoothness).c_str(), configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "BoneNum", std::to_string(Config::boneNum).c_str(), configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "SilentAim", Config::bSilentAim ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "SnapLines", Config::bSnaplines ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "FOV", Config::bFov ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "FOVRadius", std::to_string(Config::fovRadius).c_str(), configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "VisibleCheck", Config::bVisCheck ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "TriggerBot", Config::bTriggerbot ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("ESP", "ESP", Config::bEsp ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("ESP", "DrawHealthBar", Config::bHealthbar ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("ESP", "DrawNames", Config::bNames ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("ESP", "DrawDistance", Config::bDistance ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("ESP", "RadarHack", Config::bRadar ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Misc", "RCS", Config::bRcs ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Misc", "NoFlash", Config::bAntiFlash ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Misc", "BunnyHop", Config::bBunnyHop ? "1" : "0", configPath.c_str());
+						CloseHandle(hFile);
+					}
+				}
+			}
+
 			ImGui::EndTabItem();
 		}
 
