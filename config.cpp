@@ -11,6 +11,7 @@ float Config::fovRadius = 20.0f;
 bool Config::bTriggerbot = false;
 bool Config::bEsp = false;
 bool Config::bNames = true;
+bool Config::bDistance = true;
 bool Config::bHealthbar = false;
 bool Config::bEspSnap = false;
 bool Config::bSkeleton = false;

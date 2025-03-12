@@ -221,16 +221,37 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 				IVEngineClient* engine = (IVEngineClient*)GetInterface(L"engine.dll", "VEngineClient014");
 
 				PlayerInfo_t playerInfo;
+				Vector3 newHead = entity->bodypos;
+				newHead.z = entity->bodypos.z + 75.0f;
 
-				Vector3 bodyPos = entity->bodypos;
-				bodyPos.y -= 20;
-
-				Vector2 screenCoords;
+				Vector2 headScreen, originScreen;
 				
 				if (engine->GetPlayerInfo(i + 1, &playerInfo)) {
-					if (DirectX::WorldToScreen(bodyPos, screenCoords, viewMatrix)) {
-						DirectX::IngameText(screenCoords.x, screenCoords.y, color, playerInfo.szName);
+					if (DirectX::WorldToScreen(newHead, headScreen, viewMatrix) && DirectX::WorldToScreen(entity->origin, originScreen, viewMatrix)) {
+
+						float height = originScreen.y - headScreen.y;
+						float width = height / 4.0f;
+
+						DirectX::IngameText(originScreen.x - width, originScreen.y, color, playerInfo.szName);
 					}
+				}
+			}
+
+			if (Config::bDistance) {
+				Vector3 newHead = entity->bodypos;
+				newHead.z = entity->bodypos.z + 75.0f;
+
+				Vector2 headScreen, originScreen;
+
+				if (DirectX::WorldToScreen(newHead, headScreen, viewMatrix) && DirectX::WorldToScreen(entity->origin, originScreen, viewMatrix)) {
+					float height = originScreen.y - headScreen.y;
+					float width = height / 4.0f;
+					
+					int distance = entity->bodypos.getDistance(dwLocalPlayer->bodypos);
+					std::string distanceStr = std::to_string(distance);
+					const char* distanceChar = distanceStr.c_str();
+
+					DirectX::IngameText(originScreen.x + width, originScreen.y, color, distanceChar);
 				}
 			}
 
@@ -467,6 +488,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		if (ImGui::BeginTabItem("Visuals")) {
 			ImGui::Checkbox("Draw Box", &Config::bEsp);
 			ImGui::Checkbox("HealthBar", &Config::bHealthbar);
+			ImGui::Checkbox("Draw distance", &Config::bDistance);
 			ImGui::Checkbox("Draw Skeleton", &Config::bSkeleton);
 			ImGui::Checkbox("Draw Names", &Config::bNames);
 			ImGui::Checkbox("Snaplines", &Config::bEspSnap);

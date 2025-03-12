@@ -14,6 +14,7 @@ namespace Config {
 	extern bool bTriggerbot;
 	extern bool bEsp;
 	extern bool bNames;
+	extern bool bDistance;
 	extern bool bHealthbar;
 	extern bool bSkeleton;
 	extern bool bEspSnap;
