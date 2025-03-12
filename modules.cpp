@@ -565,7 +565,22 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 
 					Config::bAimbot = GetPrivateProfileIntA("Aimbot", "Aimbot", 0, selectedConfigPath.c_str());
 					Config::smoothness = std::stof(smoothValue);
-					Config::boneNum = GetPrivateProfileIntA("Aimbot", "BoneNum", 8, selectedConfigPath.c_str());
+					Config::boneNum = GetPrivateProfileIntA("Aimbot", "BoneNum", 7, selectedConfigPath.c_str());
+					switch (Config::boneNum)
+					{
+					case 8: // head
+						selectedBone = 0;
+						break;
+					case 7: //neck
+						selectedBone = 1;
+						break;
+					case 6: // torso
+						selectedBone = 2;
+						break;
+					case 4: // stomach
+						selectedBone = 3;
+						break;
+					}
 					Config::bSilentAim = GetPrivateProfileIntA("Aimbot", "SilentAim", 0, selectedConfigPath.c_str());
 					Config::bSnaplines = GetPrivateProfileIntA("Aimbot", "SnapLines", 0, selectedConfigPath.c_str());
 					Config::bFov = GetPrivateProfileIntA("Aimbot", "FOV", 0, selectedConfigPath.c_str());
