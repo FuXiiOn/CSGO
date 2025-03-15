@@ -20,6 +20,7 @@ namespace Config {
 	extern bool bEspSnap;
 	extern bool bRadar;
 	extern bool bBunnyHop;
+	extern bool bStrafe;
 	extern bool bAntiFlash;
 	extern bool bRcs;
 	extern float smoothness;

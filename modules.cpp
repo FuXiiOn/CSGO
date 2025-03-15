@@ -134,15 +134,15 @@ bool isVisible(ent* entity) {
 }
 
 bool __stdcall hkCreateMove(float frameTime, UserCmd* cmd) {
+	uintptr_t clientBase = (uintptr_t)GetModuleHandle(L"client.dll");
+	uintptr_t engineBase = (uintptr_t)GetModuleHandle(L"engine.dll");
+	ent* dwLocalPlayer = *(ent**)(clientBase + 0x4E051DC);
 
 	std::cout << "hooked\n";
 
 	if (Config::bSilentAim && closestEntity && (cmd->buttons & IN_ATTACK)) {
 
 		if (Config::bRcs) {
-			uintptr_t clientBase = (uintptr_t)GetModuleHandle(L"client.dll");
-			uintptr_t engineBase = (uintptr_t)GetModuleHandle(L"engine.dll");
-			ent* dwLocalPlayer = *(ent**)(clientBase + 0x4E051DC);
 			Vector3 newAngles;
 			newAngles.y = bestYaw;
 			newAngles.x = bestPitch;
@@ -159,6 +159,17 @@ bool __stdcall hkCreateMove(float frameTime, UserCmd* cmd) {
 		else {
 			cmd->viewPoint.y = bestYaw;
 			cmd->viewPoint.x = bestPitch;
+		}
+	}
+
+	if (Config::bStrafe) {
+		if (!(dwLocalPlayer->flags & (1 << 0)) && GetAsyncKeyState(VK_SPACE) & 0x8000) {
+
+			if (cmd->mouseDeltaX > 0)
+				cmd->sideMove = 450.0f;
+
+			if (cmd->mouseDeltaX < 0)
+				cmd->sideMove = -450.0f;
 		}
 	}
 
@@ -248,7 +259,8 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					float width = height / 4.0f;
 					
 					int distance = entity->bodypos.getDistance(dwLocalPlayer->bodypos);
-					std::string distanceStr = std::to_string(distance);
+					int fixedDistance = entity->bodypos.getDistance(dwLocalPlayer->bodypos) * 0.01905f;
+					std::string distanceStr = std::to_string(fixedDistance);
 					const char* distanceChar = distanceStr.c_str();
 
 					DirectX::IngameText(originScreen.x + width, originScreen.y, color, distanceChar);
@@ -350,7 +362,6 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 		float closestDistance = FLT_MAX;
 		Vector3* viewAngles = (Vector3*)(*(uintptr_t*)(engineBase + 0x59F19C) + 0x4D90);
 		Vector3 rcsAngles;
-		float fovDegrees = 1.4f * atan(Config::fovRadius / (wndWidth / 2.0f)) * (180.0f / PI);
 
 		for (int i = 1; i < *currPlayers; i++) {
 			ent* entity = *(ent**)(entList + i * 0x10);
@@ -383,22 +394,28 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 
 				float distance = entity->bodypos.getDistance(dwLocalPlayer->bodypos);
 
-				float fov = hypot(yawDiff, pitchDiff);
+				Vector2 screenPos;
 
-				if (Config::bFov) {
-					if (fov < closestFov && fov <= fovDegrees) {
-						closestEntity = entity;
-						closestFov = fov;
-						bestYaw = newYaw;
-						bestPitch = newPitch;
+				if (DirectX::WorldToScreen(bonePos, screenPos, viewMatrix)) {
+					float dx = screenPos.x - (wndWidth / 2);
+					float dy = screenPos.y - (wndHeight / 2);
+					float pixelFov = sqrt(dx * dx + dy * dy);
+
+					if (Config::bFov) {
+						if (pixelFov < closestFov && pixelFov <= Config::fovRadius) {
+							closestEntity = entity;
+							closestFov = pixelFov;
+							bestYaw = newYaw;
+							bestPitch = newPitch;
+						}
 					}
-				}
-				else {
-					if (distance < closestDistance) {
-						closestEntity = entity;
-						closestDistance = distance;
-						bestYaw = newYaw;
-						bestPitch = newPitch;
+					else {
+						if (distance < closestDistance) {
+							closestEntity = entity;
+							closestDistance = distance;
+							bestYaw = newYaw;
+							bestPitch = newPitch;
+						}
 					}
 				}
 			}
@@ -482,7 +499,6 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 			ImGui::Checkbox("Draw line", &Config::bSnaplines);
 			ImGui::Checkbox("Visible Check", &Config::bVisCheck);
 			ImGui::Checkbox("Triggerbot", &Config::bTriggerbot);
-			ImGui::Checkbox("RCS", &Config::bRcs);
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Visuals")) {
@@ -496,8 +512,10 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Misc")) {
+			ImGui::Checkbox("RCS", &Config::bRcs);
 			ImGui::Checkbox("No flash", &Config::bAntiFlash);
 			ImGui::Checkbox("Bunnyhop", &Config::bBunnyHop);
+			ImGui::Checkbox("Auto strafe", &Config::bStrafe);
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Settings")) {

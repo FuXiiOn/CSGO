@@ -17,6 +17,7 @@ bool Config::bEspSnap = false;
 bool Config::bSkeleton = false;
 bool Config::bRadar = true;
 bool Config::bBunnyHop = true;
+bool Config::bStrafe = true;
 bool Config::bAntiFlash = true;
 bool Config::bRcs = true;
 float Config::smoothness = 1.0f;
