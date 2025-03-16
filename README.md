@@ -4,6 +4,7 @@ Internal cheat for CSGO with hooked LockCursor, d3d9 Dummy Device and CreateMove
 ## Features:
 1. Aimbot:
    - Bone selection (Head, neck, torso, stomach)
+   - Select bone by closest to crosshair
    - Smoothing
    - Silent aim
    - Draw Line
@@ -22,6 +23,7 @@ Internal cheat for CSGO with hooked LockCursor, d3d9 Dummy Device and CreateMove
    - RCS (Working with aim)
    - Bunnyhop
    - No flash
+   - Autostrafe
 4. Settings:
    - Create Config
    - Save Config
