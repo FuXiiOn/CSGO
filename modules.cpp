@@ -138,8 +138,6 @@ bool __stdcall hkCreateMove(float frameTime, UserCmd* cmd) {
 	uintptr_t engineBase = (uintptr_t)GetModuleHandle(L"engine.dll");
 	ent* dwLocalPlayer = *(ent**)(clientBase + 0x4E051DC);
 
-	std::cout << "hooked\n";
-
 	if (Config::bSilentAim && closestEntity && (cmd->buttons & IN_ATTACK)) {
 
 		if (Config::bRcs) {
@@ -207,6 +205,28 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 	ImGui::SetNextWindowSize(ImVec2(400, 300));
 
 	if (dwLocalPlayer) {
+		float closestBoneDistance = FLT_MAX;
+
+		if (Config::bClosestBone && closestEntity) {
+			const int bones[] = { 8,7,6,4 };
+
+			for (int bone : bones) {
+				Vector3 bonePos = GetBonePos(closestEntity, bone);
+				Vector2 screenPos;
+				
+				if (DirectX::WorldToScreen(bonePos, screenPos, viewMatrix)) {
+					float dx = screenPos.x - wndWidth / 2;
+					float dy = screenPos.y - wndHeight / 2;
+					float delta = sqrt(dx * dx + dy * dy);
+
+					if (delta < closestBoneDistance) {
+						closestBoneDistance = delta;
+						Config::boneNum = bone;
+					}
+				}
+			}
+		}
+
 		for (int i = 1; i < *currPlayers; i++) {
 			ent* entity = *(ent**)(entList + i * 0x10);
 
@@ -489,6 +509,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 			ImGui::SliderFloat("Smoothness", &Config::smoothness, 0.0f, 1.0f, "%.3f");
 			ImGui::Combo("Bone Selection", &selectedBone, boneItems, IM_ARRAYSIZE(boneItems));
 			Config::boneNum = boneIDS[selectedBone];
+			ImGui::Checkbox("Select closest bone", &Config::bClosestBone);
 			ImGui::Checkbox("FOV", &Config::bFov);
 			if (Config::bFov) {
 				ImGui::SliderFloat("FOV Radius", &Config::fovRadius, 20.0f, 500.0f, "%.3f");

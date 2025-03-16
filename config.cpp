@@ -3,6 +3,7 @@
 bool Config::showMenu = false;
 bool Config::bAimbot = false;
 bool Config::bSilentAim = true;
+bool Config::bClosestBone = true;
 bool Config::bSnaplines = true;
 bool Config::bVisCheck = false;
 int Config::boneNum = 8;
@@ -10,7 +11,7 @@ bool Config::bFov = true;
 float Config::fovRadius = 20.0f;
 bool Config::bTriggerbot = false;
 bool Config::bEsp = false;
-bool Config::bNames = true;
+bool Config::bNames = false;
 bool Config::bDistance = true;
 bool Config::bHealthbar = false;
 bool Config::bEspSnap = false;
