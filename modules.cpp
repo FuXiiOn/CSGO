@@ -580,6 +580,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					WritePrivateProfileStringA("Aimbot", "Aimbot", Config::bAimbot ? "1" : "0", selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "Smoothing", std::to_string(Config::smoothness).c_str(), selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "BoneNum", std::to_string(Config::boneNum).c_str(), selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "ClosestBone", std::to_string(Config::bClosestBone).c_str(), selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "SilentAim", Config::bSilentAim ? "1" : "0", selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "SnapLines", Config::bSnaplines ? "1" : "0", selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "FOV", Config::bFov ? "1" : "0", selectedConfigPath.c_str());
@@ -594,6 +595,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					WritePrivateProfileStringA("Misc", "RCS", Config::bRcs ? "1" : "0", selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Misc", "NoFlash", Config::bAntiFlash ? "1" : "0", selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Misc", "BunnyHop", Config::bBunnyHop ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Misc", "Autostrafe", Config::bStrafe ? "1" : "0", selectedConfigPath.c_str());
 				}
 
 				if (ImGui::Button("Load Config", ImVec2(120, 20))) {
@@ -620,6 +622,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 						selectedBone = 3;
 						break;
 					}
+					Config::bClosestBone = GetPrivateProfileIntA("Aimbot", "ClosestBone", 0, selectedConfigPath.c_str());
 					Config::bSilentAim = GetPrivateProfileIntA("Aimbot", "SilentAim", 0, selectedConfigPath.c_str());
 					Config::bSnaplines = GetPrivateProfileIntA("Aimbot", "SnapLines", 0, selectedConfigPath.c_str());
 					Config::bFov = GetPrivateProfileIntA("Aimbot", "FOV", 0, selectedConfigPath.c_str());
@@ -634,6 +637,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					Config::bRcs = GetPrivateProfileIntA("Misc", "RCS", 0, selectedConfigPath.c_str());
 					Config::bAntiFlash = GetPrivateProfileIntA("Misc", "NoFlash", 0, selectedConfigPath.c_str());
 					Config::bBunnyHop = GetPrivateProfileIntA("Misc", "BunnyHop", 0, selectedConfigPath.c_str());
+					Config::bStrafe = GetPrivateProfileIntA("Misc", "Autostrafe", 0, selectedConfigPath.c_str());
 				}
 
 				if (ImGui::Button("Delete Config", ImVec2(120, 20))) {
@@ -674,6 +678,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 						WritePrivateProfileStringA("Aimbot", "Aimbot", Config::bAimbot ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "Smoothing", std::to_string(Config::smoothness).c_str(), configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "BoneNum", std::to_string(Config::boneNum).c_str(), configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "ClosestBone", Config::bClosestBone ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "SilentAim", Config::bSilentAim ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "SnapLines", Config::bSnaplines ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "FOV", Config::bFov ? "1" : "0", configPath.c_str());
@@ -688,6 +693,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 						WritePrivateProfileStringA("Misc", "RCS", Config::bRcs ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Misc", "NoFlash", Config::bAntiFlash ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Misc", "BunnyHop", Config::bBunnyHop ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Misc", "Autostrafe", Config::bStrafe ? "1" : "0", configPath.c_str());
 						CloseHandle(hFile);
 					}
 				}
