@@ -10,6 +10,7 @@ Internal cheat for CSGO with hooked LockCursor, d3d9 Dummy Device and CreateMove
    - Draw Line
    - FOV Radius
    - Visible Check
+   - Hitchance (0-100%)
 2. ESP:
    - Draw Box
    - Draw Skeleton
