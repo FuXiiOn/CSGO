@@ -5,10 +5,6 @@
 #include "directx.h"
 
 BOOL WINAPI HackThread(HMODULE hModule) {
-    AllocConsole();
-    FILE* file;
-    freopen_s(&file, "CONOUT$", "w", stdout);
-
     initHooks();
 
     Sleep(100);
@@ -28,8 +24,6 @@ BOOL WINAPI HackThread(HMODULE hModule) {
 
     disableHooks();
 
-    FreeConsole();
-    fclose(file);
     FreeLibraryAndExitThread(hModule, 0);
 }
 

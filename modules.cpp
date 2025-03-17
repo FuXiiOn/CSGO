@@ -139,24 +139,27 @@ bool __stdcall hkCreateMove(float frameTime, UserCmd* cmd) {
 	ent* dwLocalPlayer = *(ent**)(clientBase + 0x4E051DC);
 
 	if (Config::bSilentAim && closestEntity && (cmd->buttons & IN_ATTACK)) {
+		int chance = rand() % 100;
+		std::cout << chance << "\n";
+		if (chance < Config::hitchance) {
+			if (Config::bRcs) {
+				Vector3 newAngles;
+				newAngles.y = bestYaw;
+				newAngles.x = bestPitch;
 
-		if (Config::bRcs) {
-			Vector3 newAngles;
-			newAngles.y = bestYaw;
-			newAngles.x = bestPitch;
+				Vector3 punchAngle = dwLocalPlayer->aimPunch * 2;
+				if (dwLocalPlayer->shotsFired > 1) {
+					newAngles = newAngles - punchAngle;
+					newAngles.normalize();
+				}
 
-			Vector3 punchAngle = dwLocalPlayer->aimPunch * 2;
-			if (dwLocalPlayer->shotsFired > 1) {
-				newAngles = newAngles - punchAngle;
-				newAngles.normalize();
+				cmd->viewPoint.y = newAngles.y;
+				cmd->viewPoint.x = newAngles.x;
 			}
-
-			cmd->viewPoint.y = newAngles.y;
-			cmd->viewPoint.x = newAngles.x;
-		}
-		else {
-			cmd->viewPoint.y = bestYaw;
-			cmd->viewPoint.x = bestPitch;
+			else {
+				cmd->viewPoint.y = bestYaw;
+				cmd->viewPoint.x = bestPitch;
+			}
 		}
 	}
 
@@ -202,7 +205,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 	ImGui_ImplDX9_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::SetNextWindowSize(ImVec2(400, 300));
+	ImGui::SetNextWindowSize(ImVec2(500, 350));
 
 	if (dwLocalPlayer) {
 		float closestBoneDistance = FLT_MAX;
@@ -517,6 +520,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 			if (ImGui::Checkbox("Silent aim", &Config::bSilentAim)) {
 				Config::bAimbot = false;
 			}
+			ImGui::SliderInt("Hitchance", &Config::hitchance, 0, 100, "%d%%");
 			ImGui::Checkbox("Draw line", &Config::bSnaplines);
 			ImGui::Checkbox("Visible Check", &Config::bVisCheck);
 			ImGui::Checkbox("Triggerbot", &Config::bTriggerbot);
@@ -582,6 +586,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					WritePrivateProfileStringA("Aimbot", "BoneNum", std::to_string(Config::boneNum).c_str(), selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "ClosestBone", std::to_string(Config::bClosestBone).c_str(), selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "SilentAim", Config::bSilentAim ? "1" : "0", selectedConfigPath.c_str());
+					WritePrivateProfileStringA("Aimbot", "Hitchance", std::to_string(Config::hitchance).c_str(), selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "SnapLines", Config::bSnaplines ? "1" : "0", selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "FOV", Config::bFov ? "1" : "0", selectedConfigPath.c_str());
 					WritePrivateProfileStringA("Aimbot", "FOVRadius", std::to_string(Config::fovRadius).c_str(), selectedConfigPath.c_str());
@@ -624,6 +629,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					}
 					Config::bClosestBone = GetPrivateProfileIntA("Aimbot", "ClosestBone", 0, selectedConfigPath.c_str());
 					Config::bSilentAim = GetPrivateProfileIntA("Aimbot", "SilentAim", 0, selectedConfigPath.c_str());
+					Config::hitchance = GetPrivateProfileIntA("Aimbot", "Hitchance", 100, selectedConfigPath.c_str());
 					Config::bSnaplines = GetPrivateProfileIntA("Aimbot", "SnapLines", 0, selectedConfigPath.c_str());
 					Config::bFov = GetPrivateProfileIntA("Aimbot", "FOV", 0, selectedConfigPath.c_str());
 					Config::fovRadius = std::stof(fovValue);
@@ -652,7 +658,8 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 					ImGui::SetNextWindowSize(ImVec2(150, 80));
 				}
 
-				if (ImGui::BeginPopupModal("Rename Config", 0, ImGuiWindowFlags_NoResize)) {
+				static bool renameConfig = false;
+				if (ImGui::BeginPopupModal("Rename Config", &renameConfig, ImGuiWindowFlags_NoResize)) {
 					static char newName[256];
 					std::string newNamePath = std::string(localAppdata) + "\\" + newName + ".ini";
 					ImGui::InputText("##cfgRename", newName, 256);
@@ -680,6 +687,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 						WritePrivateProfileStringA("Aimbot", "BoneNum", std::to_string(Config::boneNum).c_str(), configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "ClosestBone", Config::bClosestBone ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "SilentAim", Config::bSilentAim ? "1" : "0", configPath.c_str());
+						WritePrivateProfileStringA("Aimbot", "Hitchance", std::to_string(Config::hitchance).c_str(), configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "SnapLines", Config::bSnaplines ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "FOV", Config::bFov ? "1" : "0", configPath.c_str());
 						WritePrivateProfileStringA("Aimbot", "FOVRadius", std::to_string(Config::fovRadius).c_str(), configPath.c_str());

@@ -3,6 +3,7 @@
 bool Config::showMenu = false;
 bool Config::bAimbot = false;
 bool Config::bSilentAim = true;
+int Config::hitchance = 100;
 bool Config::bClosestBone = true;
 bool Config::bSnaplines = true;
 bool Config::bVisCheck = false;

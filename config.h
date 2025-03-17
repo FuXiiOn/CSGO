@@ -6,6 +6,7 @@ namespace Config {
 	extern bool showMenu;
 	extern bool bAimbot;
 	extern bool bSilentAim;
+	extern int hitchance;
 	extern bool bClosestBone;
 	extern bool bSnaplines;
 	extern bool bVisCheck;
