@@ -10,7 +10,7 @@ ID3DXLine* LineL;
 void DirectX::initD3D() {
 	D3DXCreateLine(pDevice, &LineL);
 
-	D3DXCreateFont(pDevice, 10, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Arial", &pFont);
+	D3DXCreateFont(pDevice, 12, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Arial", &pFont);
 }
 
 void DirectX::Cleanup() {
